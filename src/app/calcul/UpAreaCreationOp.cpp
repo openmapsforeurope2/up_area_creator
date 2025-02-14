@@ -189,9 +189,10 @@ namespace app
 
                         // if ( !poly.intersects(ign::geometry::Point(4024264.5883254, 2964606.0199504))) continue;
 
-                        ign::geometry::GeometryPtr simplyfiedExtRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.exteriorRing(), 2 ) );
+                        // ign::geometry::GeometryPtr simplyfiedExtRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.exteriorRing(), 2 ) );
 
-                        simplifiedGeomPtr.reset(simplifiedGeomPtr->Union(ign::geometry::Polygon(simplyfiedExtRing->asLineString())));
+                        // simplifiedGeomPtr.reset(simplifiedGeomPtr->Union(ign::geometry::Polygon(simplyfiedExtRing->asLineString())));
+                        simplifiedGeomPtr.reset(simplifiedGeomPtr->Union(ign::geometry::Polygon(poly.exteriorRing())));
 
                         // ign::geometry::Polygon newPoly(poly.exteriorRing());
 
@@ -200,8 +201,9 @@ namespace app
                             if( std::abs(area) < 10000 )
                                 poly.removeInteriorRingN(j);
                             else {
-                                ign::geometry::GeometryPtr simplyfiedRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.interiorRingN(j), 2 ) );
-                                simplifiedGeomPtr.reset(simplifiedGeomPtr->Difference(ign::geometry::Polygon(simplyfiedRing->asLineString())));
+                                // ign::geometry::GeometryPtr simplyfiedRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.interiorRingN(j), 2 ) );
+                                // simplifiedGeomPtr.reset(simplifiedGeomPtr->Difference(ign::geometry::Polygon(simplyfiedRing->asLineString())));
+                                simplifiedGeomPtr.reset(simplifiedGeomPtr->Difference(poly.interiorRingN(j)));
                             }
                         }
                     }
