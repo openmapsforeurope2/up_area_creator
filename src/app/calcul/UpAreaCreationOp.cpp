@@ -15,6 +15,7 @@
 #include <epg/tools/FilterTools.h>
 // #include <epg/tools/geometry/simplifyLineString.h>
 #include <epg/tools/geometry/getArea.h>
+#include <epg/tools/geometry/ToValidGeometry.h>
 
 // IGN
 #include <ign/geometry/algorithm/SimplifyOpGeos.h>
@@ -189,10 +190,14 @@ namespace app
 
                         // if ( !poly.intersects(ign::geometry::Point(4024264.5883254, 2964606.0199504))) continue;
 
-                        // ign::geometry::GeometryPtr simplyfiedExtRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.exteriorRing(), 2 ) );
+                        ign::geometry::GeometryPtr simplyfiedExtRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.exteriorRing(), 50 ) );
 
-                        // simplifiedGeomPtr.reset(simplifiedGeomPtr->Union(ign::geometry::Polygon(simplyfiedExtRing->asLineString())));
-                        simplifiedGeomPtr.reset(simplifiedGeomPtr->Union(ign::geometry::Polygon(poly.exteriorRing())));
+                        ign::geometry::Polygon polyExt(simplyfiedExtRing->asLineString());
+                        if (!polyExt.isSimple()) {
+                            epg::tools::geometry::ToValidGeometry::transform(polyExt);
+                        }
+
+                        simplifiedGeomPtr.reset(simplifiedGeomPtr->Union(polyExt));
 
                         // ign::geometry::Polygon newPoly(poly.exteriorRing());
 
@@ -201,9 +206,14 @@ namespace app
                             if( std::abs(area) < 10000 )
                                 poly.removeInteriorRingN(j);
                             else {
-                                // ign::geometry::GeometryPtr simplyfiedRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.interiorRingN(j), 2 ) );
-                                // simplifiedGeomPtr.reset(simplifiedGeomPtr->Difference(ign::geometry::Polygon(simplyfiedRing->asLineString())));
-                                simplifiedGeomPtr.reset(simplifiedGeomPtr->Difference(poly.interiorRingN(j)));
+                                ign::geometry::GeometryPtr simplyfiedRing( ign::geometry::algorithm::SimplifyOpGeos::DouglasPeuckerSimplify( poly.interiorRingN(j), 50 ) );
+
+                                ign::geometry::Polygon polyInt(simplyfiedRing->asLineString());
+                                if (!polyInt.isSimple()) {
+                                    epg::tools::geometry::ToValidGeometry::transform(polyInt);
+                                }
+
+                                simplifiedGeomPtr.reset(simplifiedGeomPtr->Difference(polyInt));
                             }
                         }
                     }
